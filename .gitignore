@@ -1,0 +1,29 @@
+# Laravel backend
+/backend/vendor/
+/backend/.env
+/backend/.env.*
+!/backend/.env.example
+/backend/storage/*.key
+/backend/storage/app/public
+/backend/storage/framework/cache
+/backend/storage/framework/sessions
+/backend/storage/framework/testing
+/backend/storage/framework/views
+/backend/storage/logs
+/backend/bootstrap/cache/*
+!/backend/bootstrap/cache/.gitignore
+
+# React frontend
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env
+/frontend/.env.*
+!/frontend/.env.example
+
+# Shared local configuration and generated output
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.phpunit.result.cache

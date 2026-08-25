@@ -1,0 +1,14 @@
+# Phase 1 UI Verification Notes
+
+The actual Vite application at `http://127.0.0.1:5173/` redirected an unauthenticated visit to `/login`, rendering the GarmentFlow login form with work-email and password inputs. Submitting the seeded local development credentials authenticated against the Laravel API and redirected to `/`.
+
+The authenticated workspace rendered the reusable sidebar, workspace navigation, enterprise-operations header, current user identity (`Test User`, `test@example.com`), Phase 1 badge, logout control, and five dashboard destinations: Executive, Supply Chain, Production, Procurement, and Warehouse. The dashboard landing view showed descriptive cards and no hard-coded KPI values.
+
+The browser-visible API-driven login and protected-route redirect succeeded. The local session was left authenticated in the browser at the end of this check; logout remains separately covered by the backend HTTP and PHPUnit checks.
+The rendered logout control returned the browser to `/login`, and a direct subsequent visit to `/dashboards/executive` also redirected to `/login`, confirming the protected-route guard after session clearing.
+After the namespace and API-response stabilization fixes, the current build again accepted the seeded login and rendered the authenticated workspace at `/`, including the user identity, logout control, sidebar/header, and all five dashboard cards.
+The final browser recheck after policy and namespace fixes rendered the authenticated workspace successfully, and the current logout control returned the browser to `/login` without runtime errors.
+Fresh repeat verification: the clean Vite server on port 5174 redirected an unauthenticated root visit to `/login`, and the current login form rendered and accepted the local seeded credentials for the authenticated-flow check.
+Repeat verification note: on the fresh Vite server at port 5174, submitting the seeded credentials surfaced the generic `Unable to sign in` UI message, while the exact default backend target `http://127.0.0.1:8000/api/auth/login` returned HTTP 200 independently. The browser console showed no error entries beyond the React DevTools informational message. This discrepancy is being diagnosed as a local browser/server integration-state issue before declaring the repeat check complete.
+Repeat verification on the configured CORS-allowed origin: the clean current Vite server at `http://127.0.0.1:5173/` redirected to `/login`, and the rendered form accepted the seeded local credentials without a browser-side error before submission.
+Completed repeat browser smoke test on the configured CORS-allowed origin: login succeeded through the current frontend/backend integration, the protected workspace rendered the user identity, sidebar, header, logout control, and all five dashboard destinations, and logout returned to `/login`.
