@@ -67,20 +67,37 @@ function ExecutiveDashboard() {
     })
   }
 
+  const DASHBOARD_TABS = [
+    { key: 'executive', label: '👑 Executive (CEO)', path: '/dashboards/executive' },
+    { key: 'supply_chain', label: '⛓️ Supply Chain', path: '/dashboards/supply-chain' },
+    { key: 'production', label: '🏭 Production', path: '/dashboards/production' },
+    { key: 'procurement', label: '📦 Procurement', path: '/dashboards/procurement' },
+    { key: 'warehouse', label: '🏢 Warehouse', path: '/dashboards/warehouse' },
+  ]
+
   return (
     <section className="dashboard-page executive-dashboard">
+      {/* 5-Role Dashboard Switcher Tabs */}
+      <div className="dashboard-switcher-tabs">
+        {DASHBOARD_TABS.map((tab) => (
+          <Link
+            className={`dashboard-switcher-tab${tab.key === 'executive' ? ' active' : ''}`}
+            key={tab.key}
+            to={tab.path}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
+
       <div className="detail-header">
         <div>
-          <Link className="back-link" to="/">
-            ← All dashboards
-          </Link>
-
           <p className="eyebrow">
             Executive / CEO dashboard
           </p>
 
           <h1>
-            Enterprise control center.
+            Enterprise Control Center
           </h1>
 
           <p className="lede">

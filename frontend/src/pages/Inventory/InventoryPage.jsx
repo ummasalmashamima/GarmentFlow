@@ -180,8 +180,42 @@ function InventoryPage() {
   const destinationLocations = locationsFor(form.destination_warehouse_id)
 
   return <div className="master-data-page inventory-page">
-    <div className="page-intro master-data-intro"><div><p className="eyebrow">Phase 7 · Inventory & Warehouse Management</p><h1>Inventory Control Center</h1><p>Control warehouse stock through auditable movements, atomic transfers, accepted Goods Receipt integration, and reasoned adjustments.</p></div><div className="inventory-header-actions"><button className="primary-button" onClick={() => openMovement('stock-in')} type="button">Stock in</button><button className="secondary-button" onClick={() => openMovement('stock-out')} type="button">Stock out</button><button className="secondary-button" onClick={openTransfer} type="button">Transfer</button><button className="secondary-button" onClick={openAdjustment} type="button">Adjust</button></div></div>
-    <div className="inventory-summary-grid"><div className="inventory-summary-card"><span>Controlled balances</span><strong>{formatNumber(summary.balance_count)}</strong><small>Warehouse/location/item/unit keys</small></div><div className="inventory-summary-card"><span>On hand</span><strong>{formatNumber(summary.quantity_on_hand)}</strong><small>All filtered balances</small></div><div className="inventory-summary-card"><span>Reserved</span><strong>{formatNumber(summary.quantity_reserved)}</strong><small>Not available for removal</small></div><div className="inventory-summary-card accent"><span>Available</span><strong>{formatNumber(summary.quantity_available)}</strong><small>On hand − reserved</small></div></div>
+    <div className="page-intro master-data-intro">
+      <div>
+        <p className="eyebrow">Phase 7 · Inventory & Warehouse Management</p>
+        <h1>Inventory Control Center</h1>
+        <p>Control warehouse stock through auditable movements, atomic transfers, accepted Goods Receipt integration, and reasoned adjustments.</p>
+      </div>
+      <div className="inventory-header-actions">
+        <button className="primary-button" onClick={() => openMovement('stock-in')} type="button">Stock In</button>
+        <button className="secondary-button" onClick={() => openMovement('stock-out')} type="button">Stock Out</button>
+        <button className="secondary-button" onClick={openTransfer} type="button">Transfer</button>
+        <button className="secondary-button" onClick={openAdjustment} type="button">Adjust</button>
+      </div>
+    </div>
+
+    <div className="summary-grid inventory-summary-grid">
+      <div className="summary-card inventory-summary-card">
+        <span>Controlled Balances</span>
+        <strong>{formatNumber(summary.balance_count)}</strong>
+        <small>Active warehouse, location & item keys</small>
+      </div>
+      <div className="summary-card inventory-summary-card">
+        <span>Quantity On Hand</span>
+        <strong>{formatNumber(summary.quantity_on_hand)}</strong>
+        <small>Total physical inventory in warehouse</small>
+      </div>
+      <div className="summary-card inventory-summary-card">
+        <span>Quantity Reserved</span>
+        <strong>{formatNumber(summary.quantity_reserved)}</strong>
+        <small>Allocated to active orders & production</small>
+      </div>
+      <div className="summary-card inventory-summary-card summary-card-accent">
+        <span>Available to Promise</span>
+        <strong>{formatNumber(summary.quantity_available)}</strong>
+        <small>Net free stock (On Hand − Reserved)</small>
+      </div>
+    </div>
     {error && <div className="feedback-message error-message">{error}</div>}{notice && <div className="feedback-message success-message">{notice}</div>}
     <div className="planning-tabs inventory-tabs">{[['balances', 'Inventory'], ['history', 'Transactions'], ['transfers', 'Transfers'], ['adjustments', 'Adjustments']].map(([value, label]) => <button className={tab === value ? 'active' : ''} key={value} onClick={() => setTab(value)} type="button">{label}</button>)}</div>
     <div className="master-data-toolbar inventory-toolbar"><label className="search-field"><span>Search</span><input onChange={(event) => updateQuery({ search: event.target.value })} placeholder="Search references, items, or warehouses" value={query.search} /></label>{renderFilters()}<span className="record-count">{meta.total || 0} records</span></div>

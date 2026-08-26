@@ -212,7 +212,26 @@ function FinancePage() {
 
   return <div className="master-data-page finance-page">
     <div className="page-intro master-data-intro"><div><p className="eyebrow">Phase 11 · Finance Management</p><h1>Finance</h1><p>Issue invoices from eligible Sales Orders, record auditable payments, and review receivables, payables, and transparent profit calculations.</p></div><button className="primary-button" onClick={openCreateInvoice} type="button">Create Invoice</button></div>
-    <div className="production-tabs" role="tablist" aria-label="Finance views">{[['invoices', 'Invoices'], ['payments', 'Payments'], ['receivables', 'Receivables'], ['payables', 'Payables'], ['profit', 'Profit Summary'], ['history', 'Finance History']].map(([value, label]) => <button aria-selected={tab === value} className={`secondary-button ${tab === value ? 'active-tab' : ''}`} key={value} onClick={() => changeTab(value)} role="tab" type="button">{label}</button>)}</div>
+    <div className="tab-strip finance-tabs" role="tablist" aria-label="Finance views">
+      {[
+        ['invoices', 'Invoices'],
+        ['payments', 'Payments'],
+        ['receivables', 'Receivables'],
+        ['payables', 'Payables'],
+        ['profit', 'Profit Summary'],
+        ['history', 'Finance History'],
+      ].map(([value, label]) => (
+        <button
+          className={tab === value ? 'active' : ''}
+          key={value}
+          onClick={() => changeTab(value)}
+          role="tab"
+          type="button"
+        >
+          {label}
+        </button>
+      ))}
+    </div>
     {error && <div className="feedback-message error-message" role="alert">{error}</div>}{notice && <div className="feedback-message success-message" role="status">{notice}</div>}
 
     {tab === 'invoices' && <section className="data-card"><div className="data-card-header"><div><p className="eyebrow">Accounts receivable register</p><h2>Invoices</h2></div><span className="data-card-hint">Only delivered or completed Sales Orders can be invoiced</span></div><div className="master-data-toolbar"><label className="search-field"><span>Search</span><input onChange={(event) => updateQuery(setInvoiceQuery, { search: event.target.value })} placeholder="Invoice, Sales Order, or party" value={invoiceQuery.search} /></label><label className="filter-field"><span>Status</span><select onChange={(event) => updateQuery(setInvoiceQuery, { status: event.target.value })} value={invoiceQuery.status}><option value="">All statuses</option>{invoiceStatuses.map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}</select></label><span className="record-count">{invoiceMeta.total || 0} invoices</span></div>{loading ? <div className="empty-state">Loading invoices…</div> : invoiceRecords.length === 0 ? <div className="empty-state">No invoices match the current filters.</div> : <div className="table-wrap"><table className="master-data-table"><thead><tr>{[['invoice_number', 'Invoice number'], ['invoice_date', 'Invoice date'], ['due_date', 'Due date'], ['total_amount', 'Total'], ['paid_amount', 'Paid'], ['due_amount', 'Due'], ['status', 'Status']].map(([column, label]) => <th key={column}><button onClick={() => toggleSort(setInvoiceQuery, invoiceQuery, column)} type="button">{label}{invoiceQuery.sort === column ? ` ${invoiceQuery.direction === 'asc' ? '↑' : '↓'}` : ''}</button></th>)}<th>Party</th><th>Sales Order</th><th /></tr></thead><tbody>{invoiceRecords.map((invoice) => <tr key={invoice.id} onClick={() => openInvoice(invoice)}><td><strong>{invoice.invoice_number}</strong></td><td>{invoice.invoice_date || '—'}</td><td>{invoice.due_date || '—'}</td><td>{formatMoney(invoice.total_amount)}</td><td>{formatMoney(invoice.paid_amount)}</td><td>{formatMoney(invoice.due_amount)}</td><td><span className={statusClass(invoice.status)}>{statusLabel(invoice.status)}</span></td><td>{partyLabel(invoice)}</td><td>{invoice.sales_order?.sales_order_number || '—'}</td><td className="table-actions" onClick={(event) => event.stopPropagation()}><button className="text-button" onClick={() => openInvoice(invoice)} type="button">Open</button></td></tr>)}</tbody></table></div>}<Pagination meta={invoiceMeta} loading={loading} onPage={(page) => updateQuery(setInvoiceQuery, { page })} /></section>}

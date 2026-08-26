@@ -264,8 +264,10 @@ function DeliveryPage() {
   const sortLabel = (column, label) => `${label}${query.sort === column ? ` ${query.direction === 'asc' ? '↑' : '↓'}` : ''}`
 
   return <div className="master-data-page delivery-page">
-    <div className="page-intro master-data-intro"><div><p className="eyebrow">Phase 10 · Delivery & Shipment Tracking</p><h1>Deliveries</h1><p>Create deliveries from confirmed Sales Orders, dispatch through canonical InventoryService stock-out, and keep every shipment event auditable.</p></div><button className="primary-button" onClick={openCreate} type="button">Create Delivery</button></div>
-    <div className="production-tabs" role="tablist" aria-label="Delivery views"><button className={`secondary-button ${tab === 'deliveries' ? 'active-tab' : ''}`} onClick={() => setTab('deliveries')} role="tab" type="button" aria-selected={tab === 'deliveries'}>Delivery Register</button><button className={`secondary-button ${tab === 'history' ? 'active-tab' : ''}`} onClick={() => setTab('history')} role="tab" type="button" aria-selected={tab === 'history'}>Delivery History</button></div>
+    <div className="tab-strip delivery-tabs" role="tablist" aria-label="Delivery views">
+      <button className={tab === 'deliveries' ? 'active' : ''} onClick={() => setTab('deliveries')} role="tab" type="button" aria-selected={tab === 'deliveries'}>Delivery Register</button>
+      <button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')} role="tab" type="button" aria-selected={tab === 'history'}>Delivery History</button>
+    </div>
 
     {tab === 'deliveries' && <>
       <div className="master-data-toolbar"><label className="search-field"><span>Search</span><input onChange={(event) => updateQuery({ search: event.target.value })} placeholder="Delivery, tracking, Sales Order, or party" value={query.search} /></label><label className="filter-field"><span>Status</span><select onChange={(event) => updateQuery({ status: event.target.value })} value={query.status}><option value="">All statuses</option>{statuses.map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}</select></label><label className="filter-field"><span>Warehouse</span><select onChange={(event) => updateQuery({ warehouse_id: event.target.value })} value={query.warehouse_id}><option value="">All warehouses</option>{warehouses.map((warehouse) => <option key={warehouse.id} value={warehouse.id}>{warehouse.code} · {warehouse.name}</option>)}</select></label><span className="record-count">{meta.total || 0} deliveries</span></div>

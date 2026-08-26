@@ -6,7 +6,7 @@ import salesService from '../../services/salesService'
 const emptyPage = { data: [], meta: { current_page: 1, last_page: 1, per_page: 10, total: 0 } }
 const today = () => new Date().toISOString().slice(0, 10)
 const emptyItem = () => ({ product_id: '', product_variant_id: '', unit_id: '', ordered_quantity: '', unit_price: '', discount_amount: '', tax_amount: '', remarks: '' })
-const emptyForm = () => ({ buyer_id: '', customer_id: '', order_date: today(), required_delivery_date: '', warehouse_id: '', delivery_address: '', contact_information: '', order_discount_amount: '', order_tax_amount: '', remarks: '', items: [emptyItem()] })
+const emptyForm = () => ({ partyType: 'buyer', buyer_id: '', customer_id: '', order_date: today(), required_delivery_date: '', warehouse_id: '', delivery_address: '', contact_information: '', order_discount_amount: '', order_tax_amount: '', remarks: '', items: [emptyItem()] })
 const statuses = ['draft', 'submitted', 'confirmed', 'ready_for_delivery', 'delivered', 'completed', 'cancelled']
 
 function errorMessage(error) {
@@ -131,6 +131,34 @@ function SalesOrderPage() {
     items: current.items.map((item, itemIndex) => itemIndex === index ? { ...item, [name]: value, ...(name === 'product_id' ? { product_variant_id: '', unit_id: '' } : {}) } : item),
   }))
 
+  const handlePartyTypeChange = (type) => {
+    setOrderForm((current) => ({
+      ...current,
+      partyType: type,
+      buyer_id: type === 'buyer' ? current.buyer_id : '',
+      customer_id: type === 'customer' ? current.customer_id : '',
+    }))
+    setError('')
+  }
+
+  const handleBuyerChange = (buyerId) => {
+    setOrderForm((current) => ({
+      ...current,
+      buyer_id: buyerId,
+      customer_id: '',
+    }))
+    setError('')
+  }
+
+  const handleCustomerChange = (customerId) => {
+    setOrderForm((current) => ({
+      ...current,
+      customer_id: customerId,
+      buyer_id: '',
+    }))
+    setError('')
+  }
+
   const openCreate = () => {
     setSelectedOrder(null)
     setAvailability(null)
@@ -168,7 +196,9 @@ function SalesOrderPage() {
     }
 
     setSelectedOrder(detail)
+    const partyType = detail.buyer_id ? 'buyer' : 'customer'
     setOrderForm({
+      partyType,
       buyer_id: detail.buyer_id || '',
       customer_id: detail.customer_id || '',
       order_date: detail.order_date || today(),
@@ -235,10 +265,20 @@ function SalesOrderPage() {
     setBusy(true)
     setError('')
     setNotice('')
+
+    const buyerId = orderForm.buyer_id ? Number(orderForm.buyer_id) : null
+    const customerId = orderForm.customer_id ? Number(orderForm.customer_id) : null
+
+    if (!buyerId && !customerId) {
+      setError('Please select exactly one registered Sourcing Buyer or Direct Customer.')
+      setBusy(false)
+      return
+    }
+
     try {
       const payload = {
-        buyer_id: orderForm.buyer_id ? Number(orderForm.buyer_id) : null,
-        customer_id: orderForm.customer_id ? Number(orderForm.customer_id) : null,
+        buyer_id: buyerId,
+        customer_id: customerId,
         order_date: orderForm.order_date,
         required_delivery_date: orderForm.required_delivery_date,
         warehouse_id: Number(orderForm.warehouse_id),
@@ -303,8 +343,19 @@ function SalesOrderPage() {
         <button className="primary-button" onClick={openCreate} type="button">Create Sales Order</button>
       </div>
 
-      <div className="production-tabs" role="tablist" aria-label="Sales views">
-        {[['orders', 'Sales Orders'], ['availability', 'Finished Goods Availability'], ['history', 'Sales History']].map(([value, label]) => <button className={`secondary-button ${tab === value ? 'active-tab' : ''}`} key={value} onClick={() => setTab(value)} role="tab" type="button" aria-selected={tab === value}>{label}</button>)}
+      <div className="tab-strip sales-tabs" role="tablist" aria-label="Sales views">
+        {[['orders', 'Sales Orders'], ['availability', 'Finished Goods Availability'], ['history', 'Sales History']].map(([value, label]) => (
+          <button
+            className={tab === value ? 'active' : ''}
+            key={value}
+            onClick={() => setTab(value)}
+            role="tab"
+            type="button"
+            aria-selected={tab === value}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {tab === 'orders' && <>
@@ -332,7 +383,72 @@ function SalesOrderPage() {
 
       {modal === 'form' && <div className="modal-backdrop" role="presentation"><div className="modal-card order-modal-card" role="dialog" aria-modal="true" aria-labelledby="sales-order-form-title"><div className="modal-header"><div><p className="eyebrow">Sales Order draft</p><h2 id="sales-order-form-title">{selectedOrder ? 'Edit draft Sales Order' : 'Create Sales Order'}</h2></div><button aria-label="Close Sales Order form" className="icon-button" onClick={closeModal} type="button">×</button></div><form className="master-data-form" onSubmit={submitForm}>
         {catalogLoading && <div className="inline-preview" role="status">Loading Sales master-data options…</div>}
-        <div className="form-grid"><label className="form-field"><span>Buyer</span><select onChange={(event) => setFormValue('buyer_id', event.target.value)} value={orderForm.buyer_id}><option value="">Select buyer</option>{catalog.buyers.map((buyer) => <option key={buyer.id} value={buyer.id}>{buyer.code} · {buyer.name}</option>)}</select></label><label className="form-field"><span>Customer</span><select onChange={(event) => setFormValue('customer_id', event.target.value)} value={orderForm.customer_id}><option value="">Select customer</option>{catalog.customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.code} · {customer.name}</option>)}</select></label><label className="form-field"><span>Order date *</span><input onChange={(event) => setFormValue('order_date', event.target.value)} required type="date" value={orderForm.order_date} /></label><label className="form-field"><span>Required delivery date *</span><input onChange={(event) => setFormValue('required_delivery_date', event.target.value)} required type="date" value={orderForm.required_delivery_date} /></label><label className="form-field"><span>Warehouse *</span><select onChange={(event) => setFormValue('warehouse_id', event.target.value)} required value={orderForm.warehouse_id}><option value="">Select warehouse</option>{catalog.warehouses.map((warehouse) => <option key={warehouse.id} value={warehouse.id}>{warehouse.code} · {warehouse.name}</option>)}</select></label><label className="form-field"><span>Order discount</span><input min="0" onChange={(event) => setFormValue('order_discount_amount', event.target.value)} step="0.0001" type="number" value={orderForm.order_discount_amount} /></label><label className="form-field"><span>Order tax</span><input min="0" onChange={(event) => setFormValue('order_tax_amount', event.target.value)} step="0.0001" type="number" value={orderForm.order_tax_amount} /></label><label className="form-field full-width"><span>Delivery address</span><textarea onChange={(event) => setFormValue('delivery_address', event.target.value)} rows="2" value={orderForm.delivery_address} /></label><label className="form-field full-width"><span>Contact information</span><input onChange={(event) => setFormValue('contact_information', event.target.value)} value={orderForm.contact_information} /></label><label className="form-field full-width"><span>Remarks</span><textarea onChange={(event) => setFormValue('remarks', event.target.value)} rows="2" value={orderForm.remarks} /></label></div>
+        <div className="form-grid">
+          <div className="form-field full-width party-type-field">
+            <span>Bill-To Ordering Party *</span>
+            <div className="party-type-tabs" style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+              <button
+                type="button"
+                className={`secondary-button ${orderForm.partyType === 'buyer' ? 'primary-button' : ''}`}
+                onClick={() => handlePartyTypeChange('buyer')}
+                style={{ flex: 1, padding: '9px', fontSize: '13px' }}
+              >
+                🏢 Sourcing Buyer
+              </button>
+              <button
+                type="button"
+                className={`secondary-button ${orderForm.partyType === 'customer' ? 'primary-button' : ''}`}
+                onClick={() => handlePartyTypeChange('customer')}
+                style={{ flex: 1, padding: '9px', fontSize: '13px' }}
+              >
+                👤 Direct Customer
+              </button>
+            </div>
+          </div>
+
+          {orderForm.partyType === 'buyer' ? (
+            <label className="form-field full-width">
+              <span>Select Sourcing Buyer *</span>
+              <select
+                onChange={(event) => handleBuyerChange(event.target.value)}
+                required
+                value={orderForm.buyer_id}
+              >
+                <option value="">Choose registered buyer (e.g. H&M, Zara, Target)</option>
+                {catalog.buyers.map((buyer) => (
+                  <option key={buyer.id} value={buyer.id}>
+                    {buyer.code} · {buyer.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <label className="form-field full-width">
+              <span>Select Direct Customer *</span>
+              <select
+                onChange={(event) => handleCustomerChange(event.target.value)}
+                required
+                value={orderForm.customer_id}
+              >
+                <option value="">Choose registered customer</option>
+                {catalog.customers.map((customer) => (
+                  <option key={customer.id} value={customer.id}>
+                    {customer.code} · {customer.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          <label className="form-field"><span>Order date *</span><input onChange={(event) => setFormValue('order_date', event.target.value)} required type="date" value={orderForm.order_date} /></label>
+          <label className="form-field"><span>Required delivery date *</span><input onChange={(event) => setFormValue('required_delivery_date', event.target.value)} required type="date" value={orderForm.required_delivery_date} /></label>
+          <label className="form-field"><span>Warehouse *</span><select onChange={(event) => setFormValue('warehouse_id', event.target.value)} required value={orderForm.warehouse_id}><option value="">Select warehouse</option>{catalog.warehouses.map((warehouse) => <option key={warehouse.id} value={warehouse.id}>{warehouse.code} · {warehouse.name}</option>)}</select></label>
+          <label className="form-field"><span>Order discount</span><input min="0" onChange={(event) => setFormValue('order_discount_amount', event.target.value)} step="0.0001" type="number" value={orderForm.order_discount_amount} /></label>
+          <label className="form-field"><span>Order tax</span><input min="0" onChange={(event) => setFormValue('order_tax_amount', event.target.value)} step="0.0001" type="number" value={orderForm.order_tax_amount} /></label>
+          <label className="form-field full-width"><span>Delivery address</span><textarea onChange={(event) => setFormValue('delivery_address', event.target.value)} rows="2" value={orderForm.delivery_address} /></label>
+          <label className="form-field full-width"><span>Contact information</span><input onChange={(event) => setFormValue('contact_information', event.target.value)} value={orderForm.contact_information} /></label>
+          <label className="form-field full-width"><span>Remarks</span><textarea onChange={(event) => setFormValue('remarks', event.target.value)} rows="2" value={orderForm.remarks} /></label>
+        </div>
         <div className="order-lines-heading"><div><p className="eyebrow">Sales lines</p><h3>Products and variants</h3></div><button className="secondary-button" onClick={addLine} type="button">Add line</button></div><div className="order-edit-lines">{orderForm.items.map((item, index) => <div className="order-edit-line" key={`line-${index}`}><label className="form-field"><span>Product *</span><select onChange={(event) => setLineValue(index, 'product_id', event.target.value)} required value={item.product_id}><option value="">Select product</option>{catalog.products.map((product) => <option key={product.id} value={product.id}>{optionLabel(product)}{product.name ? ` · ${product.name}` : ''}</option>)}</select></label><label className="form-field"><span>Variant</span><select onChange={(event) => setLineValue(index, 'product_variant_id', event.target.value)} value={item.product_variant_id}><option value="">Product-level stock</option>{catalog.variants.filter((variant) => String(variant.product_id) === String(item.product_id)).map((variant) => <option key={variant.id} value={variant.id}>{optionLabel(variant)}{variant.variant_name ? ` · ${variant.variant_name}` : ''}</option>)}</select></label><label className="form-field"><span>Unit *</span><select onChange={(event) => setLineValue(index, 'unit_id', event.target.value)} required value={item.unit_id}><option value="">Select unit</option>{catalog.units.map((unit) => <option key={unit.id} value={unit.id}>{unit.code} · {unit.name}</option>)}</select></label><label className="form-field"><span>Quantity *</span><input min="0.0001" onChange={(event) => setLineValue(index, 'ordered_quantity', event.target.value)} required step="0.0001" type="number" value={item.ordered_quantity} /></label><label className="form-field"><span>Unit price *</span><input min="0" onChange={(event) => setLineValue(index, 'unit_price', event.target.value)} required step="0.0001" type="number" value={item.unit_price} /></label><label className="form-field"><span>Line discount</span><input min="0" onChange={(event) => setLineValue(index, 'discount_amount', event.target.value)} step="0.0001" type="number" value={item.discount_amount} /></label><label className="form-field"><span>Line tax</span><input min="0" onChange={(event) => setLineValue(index, 'tax_amount', event.target.value)} step="0.0001" type="number" value={item.tax_amount} /></label><button aria-label={`Remove line ${index + 1}`} className="icon-button danger-text" disabled={orderForm.items.length <= 1} onClick={() => removeLine(index)} type="button">×</button></div>)}</div>
         <div className="order-preview-bar"><div><span>Subtotal</span><strong>{preview ? formatMoney(preview.subtotal) : '—'}</strong></div><div><span>Total quantity</span><strong>{preview ? formatNumber(preview.total_quantity) : '—'}</strong></div><div><span>Total amount</span><strong>{preview ? formatMoney(preview.total_amount) : '—'}</strong></div><button className="secondary-button" disabled={busy} onClick={previewTotals} type="button">{busy ? 'Calculating…' : 'Preview total'}</button></div>{preview && <div className="inline-preview" role="status">Backend preview: {formatNumber(preview.total_quantity)} units for {formatMoney(preview.total_amount)} total amount.</div>}<div className="modal-actions"><button className="secondary-button" onClick={closeModal} type="button">Cancel</button><button className="primary-button" disabled={busy || catalogLoading} type="submit">{busy ? 'Saving…' : 'Save draft'}</button></div>
       </form></div></div>}

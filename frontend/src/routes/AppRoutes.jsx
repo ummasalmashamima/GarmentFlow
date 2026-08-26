@@ -4,9 +4,7 @@ import ProtectedRoute from '../components/common/ProtectedRoute'
 import Login from '../pages/Auth/Login'
 import DashboardHome from '../pages/Dashboards/DashboardHome'
 import DashboardView from '../pages/Dashboards/DashboardView'
-
 import ExecutiveDashboard from '../pages/Dashboards/Executive/ExecutiveDashboard'
-
 import MasterDataIndex from '../pages/MasterData/MasterDataIndex'
 import MasterDataPage from '../pages/MasterData/MasterDataPage'
 import BOMPage from '../pages/BOM/BOMPage'
@@ -29,6 +27,7 @@ function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route element={<DashboardHome />} path="/" />
+          <Route element={<ExecutiveDashboard />} path="/dashboards/executive" />
           <Route element={<DashboardView />} path="/dashboards/:dashboardKey" />
           <Route element={<MasterDataIndex />} path="/master-data" />
           <Route element={<MasterDataPage />} path="/master-data/:resource" />
@@ -47,18 +46,6 @@ function AppRoutes() {
       </Route>
 
       <Route element={<Navigate replace to="/" />} path="*" />
-
-      <Route element={<DashboardHome />} path="/" />
-
-<Route
-  element={<ExecutiveDashboard />}
-  path="/dashboards/executive"
-/>
-
-<Route
-  element={<DashboardView />}
-  path="/dashboards/:dashboardKey"
-/>
     </Routes>
   )
 }

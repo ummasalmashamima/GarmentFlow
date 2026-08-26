@@ -22,68 +22,70 @@ function formatNumber(value) {
   return Number(value ?? 0).toLocaleString()
 }
 
-function SimpleBars({ data, valueKeys, labelKeys }) {
+function EmptyPanelState({ message, icon = '📊' }) {
+  return (
+    <div className="panel-empty-state">
+      <span className="panel-empty-icon">{icon}</span>
+      <p>{message}</p>
+    </div>
+  )
+}
+
+function SimpleBars({ data, valueKeys, labelKeys, emptyMessage = 'No data available for this period.' }) {
   if (!data.length) {
-    return <p className="muted-label">No data available for this period.</p>
+    return <EmptyPanelState message={emptyMessage} icon="📊" />
   }
 
   const values = data.map((item) => getValue(item, valueKeys))
   const max = Math.max(...values, 1)
 
   return (
-    <div className="series-bars">
-      {data.slice(-10).map((item, index) => {
-        const value = getValue(item, valueKeys)
-        const label =
-          labelKeys.map((key) => item?.[key]).find(Boolean) || `Item ${index + 1}`
+    <div className="series-bars-wrapper">
+      <div className="series-bars">
+        {data.slice(-10).map((item, index) => {
+          const value = getValue(item, valueKeys)
+          const label =
+            labelKeys.map((key) => item?.[key]).find(Boolean) || `Item ${index + 1}`
 
-        return (
-          <div
-            className="series-bar-item"
-            key={`${label}-${index}`}
-            title={`${label}: ${formatNumber(value)}`}
-          >
-            <div className="series-bar-track">
-              <div
-                className="series-bar-fill"
-                style={{
-                  height: `${Math.max(6, (value / max) * 100)}%`,
-                }}
-              />
+          return (
+            <div
+              className="series-bar-item"
+              key={`${label}-${index}`}
+              title={`${label}: ${formatNumber(value)}`}
+            >
+              <div className="series-bar-track">
+                <div
+                  className="series-bar-fill"
+                  style={{
+                    height: `${Math.max(6, (value / max) * 100)}%`,
+                  }}
+                />
+              </div>
+
+              <span>{String(label).slice(0, 10)}</span>
             </div>
-
-            <span>{String(label).slice(0, 10)}</span>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }
 
 function StatusList({ data }) {
   if (!data.length) {
-    return <p className="muted-label">No status data available.</p>
+    return <EmptyPanelState message="No order status data available." icon="📋" />
   }
 
   return (
     <div className="status-list">
       {data.map((item, index) => {
-        const label =
-          item?.status ||
-          item?.label ||
-          item?.name ||
-          `Status ${index + 1}`
-
+        const label = item.status || item.label || `State ${index + 1}`
         const count =
-          item?.count ??
-          item?.quantity ??
-          item?.total ??
-          item?.value ??
-          0
+          item.count ?? item.total_orders ?? item.orders_count ?? item.value ?? 0
 
         return (
           <div className="status-row" key={`${label}-${index}`}>
-            <span>{label}</span>
+            <span className="status-label">{label.replaceAll('_', ' ')}</span>
             <strong>{formatNumber(count)}</strong>
           </div>
         )
@@ -95,8 +97,9 @@ function StatusList({ data }) {
 function ExecutiveCharts({ payload }) {
   const salesSeries = getSeries(payload, [
     'sales_by_date',
-    'orders_by_date',
     'revenue_by_date',
+    'orders_trend',
+    'sales_trend',
   ])
 
   const productionSeries = getSeries(payload, [
@@ -129,6 +132,8 @@ function ExecutiveCharts({ payload }) {
 
         <SimpleBars
           data={salesSeries}
+          emptyMessage="No sales transaction data recorded for this period."
+          labelKeys={['period', 'date', 'label']}
           valueKeys={[
             'sales_value',
             'revenue',
@@ -136,7 +141,6 @@ function ExecutiveCharts({ payload }) {
             'purchase_value',
             'value',
           ]}
-          labelKeys={['period', 'date', 'label']}
         />
       </article>
 
@@ -162,13 +166,14 @@ function ExecutiveCharts({ payload }) {
 
         <SimpleBars
           data={productionSeries}
+          emptyMessage="No production output data recorded for this period."
+          labelKeys={['period', 'date', 'label']}
           valueKeys={[
             'completed_quantity',
             'production_quantity',
             'quantity',
             'value',
           ]}
-          labelKeys={['period', 'date', 'label']}
         />
       </article>
 
@@ -182,13 +187,14 @@ function ExecutiveCharts({ payload }) {
 
         <SimpleBars
           data={inventorySeries}
+          emptyMessage="No inventory movements recorded for this period."
+          labelKeys={['period', 'date', 'warehouse', 'label']}
           valueKeys={[
             'inventory_value',
             'quantity_available',
             'quantity',
             'value',
           ]}
-          labelKeys={['period', 'date', 'warehouse', 'label']}
         />
       </article>
     </div>

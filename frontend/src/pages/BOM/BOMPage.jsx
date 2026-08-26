@@ -48,6 +48,7 @@ function BOMPage() {
   const [selectedVersionId, setSelectedVersionId] = useState(null)
   const [selectedItemId, setSelectedItemId] = useState(null)
   const [modal, setModal] = useState(null)
+  const [modalSource, setModalSource] = useState('table')
   const [headerForm, setHeaderForm] = useState(emptyHeaderForm)
   const [versionForm, setVersionForm] = useState(emptyVersionForm)
   const [itemForm, setItemForm] = useState(emptyItemForm)
@@ -119,6 +120,7 @@ function BOMPage() {
 
   const openCreate = () => {
     setSelectedBom(null)
+    setModalSource('table')
     setHeaderForm(emptyHeaderForm())
     setError('')
     setNotice('')
@@ -140,8 +142,9 @@ function BOMPage() {
     }
   }
 
-  const openHeaderEdit = (bom) => {
+  const openHeaderEdit = (bom, source = 'table') => {
     setSelectedBom(bom)
+    setModalSource(source)
     setHeaderForm({ product_id: bom.product_id || '', code: bom.code || '', name: bom.name || '', description: bom.description || '', effective_from: today(), effective_to: '', version_notes: '' })
     setError('')
     setNotice('')
@@ -207,7 +210,11 @@ function BOMPage() {
       applyDetail(detail)
       await loadBoms()
       setNotice(selectedBom ? 'BOM updated successfully.' : 'BOM created successfully.')
-      setModal('details')
+      if (modalSource === 'details') {
+        setModal('details')
+      } else {
+        setModal(null)
+      }
     } catch (requestError) {
       setError(errorMessage(requestError))
     } finally {
@@ -532,7 +539,7 @@ function BOMPage() {
         <div className="modal-card bom-details-modal" role="dialog" aria-modal="true" aria-labelledby="bom-details-title">
           <div className="modal-header"><div><p className="eyebrow">Engineering definition</p><h2 id="bom-details-title">{selectedBom.name}</h2><p className="modal-subtitle">{selectedBom.code} · {selectedBom.product?.name || 'Product'}</p></div><button className="icon-button" onClick={closeModal} type="button" aria-label="Close BOM details">×</button></div>
           <div className="bom-details-body">
-            <div className="bom-summary-row"><div><span className="detail-label">Product</span><strong>{selectedBom.product?.name || '—'}</strong></div><div><span className="detail-label">Status</span><span className={statusClass(selectedBom.status)}>{selectedBom.status}</span></div><div><span className="detail-label">Versions</span><strong>{versions.length}</strong></div><div className="detail-actions"><button className="secondary-button" onClick={() => openHeaderEdit(selectedBom)} type="button">Edit BOM</button><button className="text-button danger-text" onClick={removeBom} type="button">Delete</button></div></div>
+            <div className="bom-summary-row"><div><span className="detail-label">Product</span><strong>{selectedBom.product?.name || '—'}</strong></div><div><span className="detail-label">Status</span><span className={statusClass(selectedBom.status)}>{selectedBom.status}</span></div><div><span className="detail-label">Versions</span><strong>{versions.length}</strong></div><div className="detail-actions"><button className="secondary-button" onClick={() => openHeaderEdit(selectedBom, 'details')} type="button">Edit BOM</button><button className="text-button danger-text" onClick={removeBom} type="button">Delete</button></div></div>
             <div className="bom-section-heading"><div><p className="eyebrow">Revision history</p><h3>Versions</h3></div><button className="secondary-button" onClick={() => openVersionForm()} type="button">New version</button></div>
             <div className="version-list">
               {versions.map((version) => <button className={`version-card${selectedVersion?.id === version.id ? ' selected' : ''}`} key={version.id} onClick={() => { setSelectedVersionId(version.id); setCalculation(null) }} type="button"><span>v{version.version_number}</span><strong className={statusClass(version.status)}>{version.status}</strong><small>Effective {version.effective_from || '—'} · {version.items_count ?? version.items?.length ?? 0} lines</small></button>)}

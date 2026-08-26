@@ -10,21 +10,32 @@ function formatValue(value, format = 'number') {
   return Number(value).toLocaleString(undefined, { maximumFractionDigits: 4 })
 }
 
+function EmptyPanelState({ message, icon = '📊' }) {
+  return (
+    <div className="panel-empty-state">
+      <span className="panel-empty-icon">{icon}</span>
+      <p>{message}</p>
+    </div>
+  )
+}
+
 function SeriesBars({ series = [], valueKey }) {
   const values = series.map((item) => Number(item[valueKey] ?? item.value ?? item.count ?? 0))
   const max = Math.max(...values, 1)
-  if (!series.length) return <p className="muted-label">No data in the selected range.</p>
+  if (!series.length) return <EmptyPanelState message="No series data recorded for this period." icon="📊" />
   return (
-    <div className="series-bars" aria-label={`${valueKey} chart`}>
-      {series.slice(-12).map((item, index) => {
-        const value = Number(item[valueKey] ?? item.value ?? item.count ?? 0)
-        return (
-          <div className="series-bar-item" key={`${item.period || item.status || item.label}-${index}`} title={`${item.period || item.status || item.label}: ${value}`}>
-            <div className="series-bar-track"><div className="series-bar-fill" style={{ height: `${Math.max(5, (value / max) * 100)}%` }} /></div>
-            <span>{String(item.period || item.status || item.label || '').slice(0, 10)}</span>
-          </div>
-        )
-      })}
+    <div className="series-bars-wrapper">
+      <div className="series-bars" aria-label={`${valueKey} chart`}>
+        {series.slice(-12).map((item, index) => {
+          const value = Number(item[valueKey] ?? item.value ?? item.count ?? 0)
+          return (
+            <div className="series-bar-item" key={`${item.period || item.status || item.label}-${index}`} title={`${item.period || item.status || item.label}: ${value}`}>
+              <div className="series-bar-track"><div className="series-bar-fill" style={{ height: `${Math.max(5, (value / max) * 100)}%` }} /></div>
+              <span>{String(item.period || item.status || item.label || '').slice(0, 10)}</span>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -54,10 +65,31 @@ function DashboardView() {
   const statusSeries = payload?.series?.orders_by_status || payload?.tables?.orders_by_status || payload?.tables?.status_breakdown || payload?.series?.movements_by_type || []
   const detailRows = payload?.tables?.shortages || payload?.tables?.stock_by_warehouse || payload?.tables?.receivables_by_party || []
 
+  const DASHBOARD_TABS = [
+    { key: 'executive', label: '👑 Executive (CEO)', path: '/dashboards/executive' },
+    { key: 'supply_chain', label: '⛓️ Supply Chain', path: '/dashboards/supply-chain' },
+    { key: 'production', label: '🏭 Production', path: '/dashboards/production' },
+    { key: 'procurement', label: '📦 Procurement', path: '/dashboards/procurement' },
+    { key: 'warehouse', label: '🏢 Warehouse', path: '/dashboards/warehouse' },
+  ]
+
   return (
     <section className="dashboard-page">
+      {/* 5-Role Dashboard Switcher Tabs */}
+      <div className="dashboard-switcher-tabs">
+        {DASHBOARD_TABS.map((tab) => (
+          <Link
+            className={`dashboard-switcher-tab${tab.key === dashboardKey ? ' active' : ''}`}
+            key={tab.key}
+            to={tab.path}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
+
       <div className="detail-header">
-        <div><Link className="back-link" to="/">← All dashboards</Link><p className="eyebrow">{dashboard.label} dashboard</p><h1>{dashboard.label} control view.</h1><p className="lede">{dashboard.description}</p></div>
+        <div><p className="eyebrow">{dashboard.label} dashboard</p><h1>{dashboard.label} Control View</h1><p className="lede">{dashboard.description}</p></div>
         <div className={`detail-accent accent-${dashboard.accent}`} aria-hidden="true">{dashboard.label.slice(0, 2).toUpperCase()}</div>
       </div>
       <div className="report-toolbar dashboard-toolbar">
@@ -71,11 +103,11 @@ function DashboardView() {
         <div className="metric-grid">{payload.kpis?.map((metric) => <article className="metric-card" key={metric.key}><span>{metric.label}</span><strong>{formatValue(metric.value, metric.format)}</strong>{metric.complete === false && <small>Cost data incomplete</small>}</article>)}</div>
         <div className="dashboard-content-grid">
           <article className="panel"><div className="panel-heading"><div><p className="eyebrow">Trend view</p><h2>Live operational series</h2></div><span className="muted-label">Derived from transactions</span></div><SeriesBars series={trendSeries} valueKey={trendKey} /></article>
-          <article className="panel"><div className="panel-heading"><div><p className="eyebrow">Status mix</p><h2>Work in each state</h2></div></div><div className="status-list">{statusSeries.length ? statusSeries.map((item) => <div className="status-row" key={item.status || item.label}><span>{item.status || item.label}</span><strong>{formatValue(item.count)}</strong></div>) : <p className="muted-label">No status data for this range.</p>}</div></article>
+          <article className="panel"><div className="panel-heading"><div><p className="eyebrow">Status mix</p><h2>Work in each state</h2></div></div>{statusSeries.length ? <div className="status-list">{statusSeries.map((item) => <div className="status-row" key={item.status || item.label}><span className="status-label">{String(item.status || item.label).replaceAll('_', ' ')}</span><strong>{formatValue(item.count)}</strong></div>)}</div> : <EmptyPanelState message="No status data recorded for this range." icon="📋" />}</article>
         </div>
         <div className="dashboard-content-grid lower-grid">
-          <article className="panel"><div className="panel-heading"><div><p className="eyebrow">Operational detail</p><h2>Top items and exposure</h2></div></div>{detailRows.length ? <div className="table-wrap"><table><thead><tr><th>Entity</th><th>Quantity / amount</th><th>Signal</th></tr></thead><tbody>{detailRows.slice(0, 8).map((row, index) => <tr key={row.id || row.warehouse_id || row.party_id || index}><td>{row.product || row.warehouse || row.party_name || 'Record'}</td><td>{formatValue(row.shortage_quantity ?? row.quantity_available ?? row.outstanding_amount ?? row.total_amount ?? row.required_quantity ?? 0)}</td><td><span className={`status-badge ${row.shortage_quantity ? 'status-critical' : 'status-info'}`}>{row.shortage_quantity ? 'Shortfall' : 'Live'}</span></td></tr>)}</tbody></table></div> : <p className="muted-label">No grouped records for this range.</p>}</article>
-          <article className="panel"><div className="panel-heading"><div><p className="eyebrow">Transparent BI</p><h2>Rule-based insights</h2></div></div>{payload.insights?.length ? <div className="insight-list">{payload.insights.map((insight, index) => <div className="insight-item" key={`${insight.code}-${index}`}><span className={`status-badge status-${insight.severity}`}>{insight.severity}</span><div><strong>{insight.title}</strong><p>{insight.description}</p><small>Source: {insight.source}</small></div></div>)}</div> : <p className="muted-label">No active rule-based insights.</p>}</article>
+          <article className="panel"><div className="panel-heading"><div><p className="eyebrow">Operational detail</p><h2>Top items and exposure</h2></div></div>{detailRows.length ? <div className="table-wrap"><table><thead><tr><th>Entity</th><th>Quantity / amount</th><th>Signal</th></tr></thead><tbody>{detailRows.slice(0, 8).map((row, index) => <tr key={row.id || row.warehouse_id || row.party_id || index}><td>{row.product || row.warehouse || row.party_name || 'Record'}</td><td>{formatValue(row.shortage_quantity ?? row.quantity_available ?? row.outstanding_amount ?? row.total_amount ?? row.required_quantity ?? 0)}</td><td><span className={`status-badge ${row.shortage_quantity ? 'status-critical' : 'status-info'}`}>{row.shortage_quantity ? 'Shortfall' : 'Live'}</span></td></tr>)}</tbody></table></div> : <EmptyPanelState message="No grouped transaction records for this range." icon="📦" />}</article>
+          <article className="panel"><div className="panel-heading"><div><p className="eyebrow">Transparent BI</p><h2>Rule-based insights</h2></div></div>{payload.insights?.length ? <div className="insight-list">{payload.insights.map((insight, index) => <div className="insight-item" key={`${insight.code}-${index}`}><span className={`status-badge status-${insight.severity}`}>{insight.severity}</span><div><strong>{insight.title}</strong><p>{insight.description}</p><small>Source: {insight.source}</small></div></div>)}</div> : <EmptyPanelState message="No active rule-based risk insights detected." icon="🛡️" />}</article>
         </div>
       </>}
     </section>

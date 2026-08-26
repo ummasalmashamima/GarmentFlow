@@ -336,4 +336,3 @@ final class DashboardService
         return $insights;
     }
 }
-c

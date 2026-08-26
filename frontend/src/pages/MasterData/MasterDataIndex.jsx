@@ -1,34 +1,61 @@
 import { Link } from 'react-router-dom'
 import { masterDataModules } from '../../constants/masterDataModules'
 
+const moduleIcons = {
+  buyers: '🛍️',
+  customers: '👥',
+  suppliers: '🏭',
+  categories: '📁',
+  products: '👕',
+  'product-variants': '🏷️',
+  sizes: '📏',
+  colors: '🎨',
+  units: '⚖️',
+  materials: '🧵',
+  warehouses: '🏢',
+  'warehouse-locations': '📍',
+}
+
 function MasterDataIndex() {
   return (
     <div className="master-data-page">
       <div className="page-intro master-data-intro">
         <div>
-          <p className="eyebrow">Phase 2 · Reference architecture</p>
-          <h1>Master Data</h1>
-          <p>One consistent register for the entities that keep garment operations connected.</p>
+          <p className="eyebrow">Enterprise Core Registers</p>
+          <h1>Master Data Management</h1>
+          <p>
+            Centralized register for commercial buyers, suppliers, products, sizes, colors,
+            raw materials, and multi-warehouse physical bin locations.
+          </p>
         </div>
       </div>
 
-      <section className="module-grid" aria-label="Master Data modules">
+      <div className="module-grid" aria-label="Master Data modules">
         {masterDataModules.map((module, index) => (
           <Link className="module-card" key={module.resource} to={`/master-data/${module.resource}`}>
-            <span className="module-number">{String(index + 1).padStart(2, '0')}</span>
+            <div className="card-topline">
+              <span className="module-icon" style={{ fontSize: '24px' }}>
+                {moduleIcons[module.resource] || '📄'}
+              </span>
+              <span className="card-index">0{index + 1}</span>
+            </div>
             <h2>{module.label}</h2>
             <p>{module.description}</p>
-            <span className="module-link">Open register ↗</span>
+            <span className="card-link">Open {module.singular} Register</span>
           </Link>
         ))}
-      </section>
+      </div>
 
-      <div className="phase-banner">
-        <span className="phase-banner-mark" aria-hidden="true">M</span>
+      <div className="foundation-banner" style={{ marginTop: '32px', background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
+          ✓
+        </div>
         <div>
-          <p className="eyebrow">Structured for the next workflow</p>
-          <h2>Reference data before transactions.</h2>
-          <p>All Phase 2 records use shared validation, permissions, audit logging, and reusable list/detail flows.</p>
+          <p className="eyebrow">Enterprise Data Integrity</p>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '2px 0 4px', color: 'var(--slate-900)' }}>Normalized Single Source of Truth</h3>
+          <p style={{ fontSize: '13px', color: 'var(--slate-500)', margin: 0 }}>
+            Every record enforces foreign key constraints, field validations, status checks, and audit logging across all supply chain transactions.
+          </p>
         </div>
       </div>
     </div>
