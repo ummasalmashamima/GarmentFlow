@@ -91,11 +91,11 @@ const navSections = [
   {
     title: 'Role Dashboards',
     items: [
-      { label: 'Executive (CEO)', to: '/dashboards/executive', requiredPermission: 'dashboard.executive.view', icon: Icons.Executive },
-      { label: 'Supply Chain', to: '/dashboards/supply-chain', requiredPermission: 'dashboard.supply_chain.view', icon: Icons.SupplyChain },
-      { label: 'Production', to: '/dashboards/production', requiredPermission: 'dashboard.production.view', icon: Icons.Production },
-      { label: 'Procurement', to: '/dashboards/procurement', requiredPermission: 'dashboard.procurement.view', icon: Icons.Procurement },
-      { label: 'Warehouse', to: '/dashboards/warehouse', requiredPermission: 'dashboard.warehouse.view', icon: Icons.Warehouse },
+      { label: 'Executive (CEO)', to: '/dashboards/executive', anyPermissions: ['dashboard.executive.view', 'dashboard.view'], icon: Icons.Executive },
+      { label: 'Supply Chain', to: '/dashboards/supply-chain', anyPermissions: ['dashboard.supply-chain.view', 'dashboard.supply_chain.view', 'dashboard.view'], icon: Icons.SupplyChain },
+      { label: 'Production', to: '/dashboards/production', anyPermissions: ['dashboard.production.view', 'dashboard.view'], icon: Icons.Production },
+      { label: 'Procurement', to: '/dashboards/procurement', anyPermissions: ['dashboard.procurement.view', 'dashboard.view'], icon: Icons.Procurement },
+      { label: 'Warehouse', to: '/dashboards/warehouse', anyPermissions: ['dashboard.warehouse.view', 'dashboard.view'], icon: Icons.Warehouse },
     ],
   },
   {

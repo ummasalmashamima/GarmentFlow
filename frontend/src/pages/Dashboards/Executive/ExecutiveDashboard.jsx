@@ -69,7 +69,7 @@ function ExecutiveDashboard() {
 
   const DASHBOARD_TABS = [
     { key: 'executive', label: '👑 Executive (CEO)', path: '/dashboards/executive' },
-    { key: 'supply_chain', label: '⛓️ Supply Chain', path: '/dashboards/supply-chain' },
+    { key: 'supply-chain', label: '⛓️ Supply Chain', path: '/dashboards/supply-chain' },
     { key: 'production', label: '🏭 Production', path: '/dashboards/production' },
     { key: 'procurement', label: '📦 Procurement', path: '/dashboards/procurement' },
     { key: 'warehouse', label: '🏢 Warehouse', path: '/dashboards/warehouse' },
