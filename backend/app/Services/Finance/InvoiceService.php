@@ -58,8 +58,7 @@ final class InvoiceService
     {
         return SalesOrder::query()
             ->with(['buyer', 'customer', 'warehouse', 'items.product', 'items.productVariant.product', 'items.unit'])
-            ->whereIn('status', ['delivered', 'completed'])
-            ->where('delivered_quantity', '>', 0)
+            ->whereIn('status', ['confirmed', 'in_production', 'production_completed', 'partially_delivered', 'delivered', 'completed'])
             ->whereDoesntHave('invoices')
             ->orderByDesc('id')
             ->get();
@@ -215,11 +214,12 @@ final class InvoiceService
 
     private function assertEligibleSalesOrder(SalesOrder $salesOrder): void
     {
-        if (! in_array($salesOrder->status, ['delivered', 'completed'], true)) {
-            throw ValidationException::withMessages(['sales_order_id' => 'Only delivered or completed Sales Orders can be invoiced.']);
+        if (! in_array($salesOrder->status, ['confirmed', 'in_production', 'production_completed', 'partially_delivered', 'delivered', 'completed'], true)) {
+            throw ValidationException::withMessages(['sales_order_id' => 'Only confirmed, in-progress, delivered, or completed Sales Orders can be invoiced.']);
         }
-        if ((float) $salesOrder->delivered_quantity <= 0) {
-            throw ValidationException::withMessages(['sales_order_id' => 'The Sales Order must have delivered quantity before invoicing.']);
+        $totalQuantity = (float) $salesOrder->items->sum(fn ($i) => (float) ($i->delivered_quantity > 0 ? $i->delivered_quantity : ($i->confirmed_quantity ?: $i->ordered_quantity)));
+        if ($totalQuantity <= 0) {
+            throw ValidationException::withMessages(['sales_order_id' => 'The Sales Order must have ordered/delivered quantity before invoicing.']);
         }
     }
 
@@ -231,10 +231,11 @@ final class InvoiceService
         $items = [];
         if ($requested === null) {
             foreach ($salesOrder->items as $item) {
-                if ((float) $item->delivered_quantity <= 0) {
+                $qty = (float) $item->delivered_quantity > 0 ? (float) $item->delivered_quantity : (float) ($item->confirmed_quantity ?: $item->ordered_quantity);
+                if ($qty <= 0) {
                     continue;
                 }
-                $items[] = $this->sourceItem($item, (float) $item->delivered_quantity);
+                $items[] = $this->sourceItem($item, $qty);
             }
         } else {
             foreach ($requested as $index => $input) {
@@ -243,15 +244,16 @@ final class InvoiceService
                 if ($item === null) {
                     throw ValidationException::withMessages(["items.{$index}.sales_order_item_id" => 'The invoice item must belong to the Sales Order.']);
                 }
+                $availableQty = (float) $item->delivered_quantity > 0 ? (float) $item->delivered_quantity : (float) ($item->confirmed_quantity ?: $item->ordered_quantity);
                 $quantity = (float) ($input['quantity'] ?? 0);
-                if ($quantity <= 0 || $quantity > (float) $item->delivered_quantity + 0.0000001) {
-                    throw ValidationException::withMessages(["items.{$index}.quantity" => 'Invoice quantity must be positive and no greater than delivered quantity.']);
+                if ($quantity <= 0 || $quantity > $availableQty + 0.0000001) {
+                    throw ValidationException::withMessages(["items.{$index}.quantity" => 'Invoice quantity must be positive and no greater than available quantity.']);
                 }
                 $items[] = $this->sourceItem($item, $quantity, $input);
             }
         }
         if ($items === []) {
-            throw ValidationException::withMessages(['items' => 'The eligible Sales Order has no delivered item quantity to invoice.']);
+            throw ValidationException::withMessages(['items' => 'The eligible Sales Order has no item quantity to invoice.']);
         }
 
         return $items;
