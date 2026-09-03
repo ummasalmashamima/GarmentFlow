@@ -1055,6 +1055,12 @@ tbody tr:hover {
   width: 95vw;
 }
 
+.modal-card.planning-modal-card,
+.modal-card.planning-detail-modal {
+  max-width: 860px;
+  width: 95vw;
+}
+
 .modal-header {
   display: flex;
   align-items: flex-start;
