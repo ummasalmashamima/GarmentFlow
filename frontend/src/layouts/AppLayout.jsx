@@ -91,37 +91,37 @@ const navSections = [
   {
     title: 'Role Dashboards',
     items: [
-      { label: 'Executive (CEO)', to: '/dashboards/executive', anyPermissions: ['dashboard.executive.view', 'dashboard.view'], icon: Icons.Executive },
-      { label: 'Supply Chain', to: '/dashboards/supply-chain', anyPermissions: ['dashboard.supply-chain.view', 'dashboard.supply_chain.view', 'dashboard.view'], icon: Icons.SupplyChain },
-      { label: 'Production', to: '/dashboards/production', anyPermissions: ['dashboard.production.view', 'dashboard.view'], icon: Icons.Production },
-      { label: 'Procurement', to: '/dashboards/procurement', anyPermissions: ['dashboard.procurement.view', 'dashboard.view'], icon: Icons.Procurement },
-      { label: 'Warehouse', to: '/dashboards/warehouse', anyPermissions: ['dashboard.warehouse.view', 'dashboard.view'], icon: Icons.Warehouse },
+      { label: 'Executive (CEO)', to: '/dashboards/executive', requiredPermission: 'dashboard.executive.view', icon: Icons.Executive },
+      { label: 'Supply Chain', to: '/dashboards/supply-chain', anyPermissions: ['dashboard.supply-chain.view', 'dashboard.supply_chain.view'], icon: Icons.SupplyChain },
+      { label: 'Production', to: '/dashboards/production', requiredPermission: 'dashboard.production.view', icon: Icons.Production },
+      { label: 'Procurement', to: '/dashboards/procurement', requiredPermission: 'dashboard.procurement.view', icon: Icons.Procurement },
+      { label: 'Warehouse', to: '/dashboards/warehouse', requiredPermission: 'dashboard.warehouse.view', icon: Icons.Warehouse },
     ],
   },
   {
     title: 'Garments Pipeline',
     items: [
-      { label: 'Buyer Orders', to: '/buyer-orders', icon: Icons.BuyerOrders },
-      { label: 'Planning & MRP', to: '/planning', icon: Icons.Planning },
-      { label: 'Procurement', to: '/procurement', icon: Icons.Procurement },
-      { label: 'Production Floor', to: '/production', icon: Icons.Production },
-      { label: 'Sales Orders', to: '/sales', icon: Icons.Sales },
-      { label: 'Shipments & Delivery', to: '/deliveries', icon: Icons.Delivery },
+      { label: 'Buyer Orders', to: '/buyer-orders', anyPermissions: ['buyer-order.view', 'buyer-order.manage'], icon: Icons.BuyerOrders },
+      { label: 'Planning & MRP', to: '/planning', anyPermissions: ['planning.view', 'planning.manage'], icon: Icons.Planning },
+      { label: 'Procurement', to: '/procurement', anyPermissions: ['procurement.view', 'procurement.manage'], icon: Icons.Procurement },
+      { label: 'Production Floor', to: '/production', anyPermissions: ['production.view', 'production.manage'], icon: Icons.Production },
+      { label: 'Sales Orders', to: '/sales', anyPermissions: ['sales.view', 'sales.manage'], icon: Icons.Sales },
+      { label: 'Shipments & Delivery', to: '/deliveries', anyPermissions: ['delivery.view', 'delivery.manage'], icon: Icons.Delivery },
     ],
   },
   {
     title: 'Warehouse & Assets',
     items: [
-      { label: 'Inventory Balances', to: '/inventory', icon: Icons.Warehouse },
-      { label: 'BOM Tech Packs', to: '/boms', icon: Icons.BOM },
+      { label: 'Inventory Balances', to: '/inventory', anyPermissions: ['inventory.view', 'inventory.manage'], icon: Icons.Warehouse },
+      { label: 'BOM Tech Packs', to: '/boms', anyPermissions: ['bom.view', 'bom.manage'], icon: Icons.BOM },
     ],
   },
   {
     title: 'Finance & Analytics',
     items: [
-      { label: 'Invoicing & Payments', to: '/finance', icon: Icons.Finance },
+      { label: 'Invoicing & Payments', to: '/finance', anyPermissions: ['finance.view', 'finance.manage'], icon: Icons.Finance },
       { label: 'Intelligence Reports', to: '/reports', requiredPermission: 'reports.view', icon: Icons.Reports },
-      { label: 'Master Data Registers', to: '/master-data', icon: Icons.MasterData },
+      { label: 'Master Data Registers', to: '/master-data', anyPermissions: ['master-data.view', 'master-data.manage'], icon: Icons.MasterData },
     ],
   },
 ]

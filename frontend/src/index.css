@@ -1021,59 +1021,82 @@ tbody tr:hover {
    ========================================================================== */
 .modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(5px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  z-index: 100;
-  padding: 20px;
+  z-index: 1000;
+  padding: 36px 16px;
   overflow-y: auto;
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .modal-card {
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   width: 100%;
-  max-width: 720px;
-  max-height: 90vh;
-  overflow-y: auto;
-  overflow-x: auto;
-  padding: 32px;
+  max-width: 760px;
+  margin: auto;
+  max-height: calc(100vh - 72px);
+  display: flex;
+  flex-direction: column;
   position: relative;
+  overflow: hidden;
 }
 
-.modal-card.order-modal-card {
-  max-width: 960px;
+.modal-card.order-modal-card,
+.modal-card.procurement-modal-card,
+.modal-card.planning-modal-card,
+.modal-card.production-modal-card,
+.modal-card.inventory-modal-card {
+  max-width: 900px;
   width: 95vw;
 }
 
-.modal-card.planning-modal-card,
-.modal-card.planning-detail-modal {
-  max-width: 860px;
+.modal-card.planning-detail-modal,
+.modal-card.procurement-detail-modal,
+.modal-card.order-detail-modal,
+.modal-card.inventory-detail-modal {
+  max-width: 920px;
   width: 95vw;
 }
 
 .modal-header {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
+  background: #ffffff;
+  flex-shrink: 0;
+  z-index: 2;
 }
 
 .modal-header h2 {
   font-size: 20px;
   font-weight: 800;
   color: var(--slate-900);
+  margin-top: 2px;
+}
+
+.modal-card form,
+.modal-card .master-data-form,
+.modal-card .modal-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+}
+
+.modal-card .details-list,
+.modal-card .detail-grid,
+.modal-card .availability-panel,
+.modal-card .production-action-grid {
+  overflow-y: auto;
 }
 
 .modal-actions {
@@ -1081,9 +1104,12 @@ tbody tr:hover {
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 28px;
-  padding-top: 20px;
+  padding: 16px 28px;
   border-top: 1px solid var(--border);
+  background: var(--slate-50);
+  flex-shrink: 0;
+  z-index: 2;
+  margin-top: auto;
 }
 
 .icon-button {
@@ -1248,6 +1274,65 @@ tbody tr:hover {
   font-size: 16px;
   font-weight: 800;
   color: var(--primary, #4f46e5);
+}
+
+/* Enhanced Procurement Item Card */
+.procurement-item-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 14px;
+}
+
+.procurement-item-card:hover {
+  border-color: #a5b4fc;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+}
+
+.procurement-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.procurement-item-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--slate-700);
+  background: var(--slate-100);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.procurement-item-row-top {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+}
+
+.procurement-item-row-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+@media (max-width: 640px) {
+  .procurement-item-row-top,
+  .procurement-item-row-bottom {
+    grid-template-columns: 1fr;
+  }
 }
 
 .order-lines-heading {

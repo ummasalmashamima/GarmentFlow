@@ -73,11 +73,13 @@ function DashboardHome() {
         </div>
       </div>
 
-      {/* 5 Role Dashboards Grid */}
+      {/* Role Dashboards Grid */}
       <div className="section-heading" style={{ marginBottom: '18px' }}>
         <div>
-          <p className="eyebrow">Role Dashboards</p>
-          <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)' }}>5 Specialized Executive Perspectives</h2>
+          <p className="eyebrow">Department Dashboard</p>
+          <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--slate-900)' }}>
+            {visibleDashboards.length > 1 ? `${visibleDashboards.length} Specialized Executive Perspectives` : `${visibleDashboards[0]?.label || 'Department'} Operational Control View`}
+          </h2>
         </div>
       </div>
 
